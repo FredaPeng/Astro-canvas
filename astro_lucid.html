@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar: Deep Space Edition</title>
+    <style>
+        :root {
+            --bg-deep: #020204;
+            --bg-grad: radial-gradient(circle at 50% 120%, #0f172a 0%, #000000 70%);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #38bdf8;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+
+        body { 
+            margin: 0; 
+            background: var(--bg-deep);
+            background-image: var(--bg-grad);
+            height: 100vh;
+            overflow: hidden; 
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; 
+            color: white;
+            user-select: none;
+        }
+        
+        /* --- VISUALS --- */
+        canvas { display: block; position: absolute; top:0; left:0; z-index: 1; cursor: crosshair; }
+        
+        #spectrum-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: black;
+            opacity: 0; transition: opacity 0.8s; pointer-events: none;
+            z-index: 2;
+        }
+
+        /* --- UI LAYER --- */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; pointer-events: none;
+            padding: 40px; box-sizing: border-box;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        /* HEADER */
+        header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        
+        h1 {
+            font-weight: 300; font-size: 28px; letter-spacing: 8px; margin: 0;
+            text-transform: uppercase; color: rgba(255,255,255,0.9);
+            text-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 11px; color: var(--text-muted); letter-spacing: 3px; margin-top: 8px;
+            text-transform: uppercase;
+        }
+
+        /* CONTROLS */
+        .controls {
+            pointer-events: auto;
+            display: flex; gap: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px; border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+        
+        .mode-btn {
+            background: transparent; border: none; color: var(--text-muted);
+            padding: 12px 24px; border-radius: 40px;
+            font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        
+        .mode-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+        .mode-btn.active { 
+            background: rgba(255,255,255,0.15); 
+            color: white; 
+            box-shadow: 0 0 20px rgba(255,255,255,0.05); 
+        }
+
+        /* CENTER STATUS TEXT */
+        #status-area {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; pointer-events: none; mix-blend-mode: screen;
+        }
+        
+        #status-msg {
+            font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
+            color: rgba(255,255,255,0.3); transition: opacity 0.3s;
+        }
+
+        /* RESULT CARD (Bottom) */
+        #result-container {
+            width: 100%; display: flex; justify-content: center; pointer-events: none;
+            min-height: 100px;
+        }
+
+        .info-card {
+            pointer-events: auto;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 30px 50px;
+            border-radius: 2px;
+            text-align: center;
+            
+            opacity: 0; transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .info-card.visible { opacity: 1; transform: translateY(0); }
+
+        .card-title {
+            font-size: 42px; font-weight: 200; letter-spacing: 6px;
+            color: white; margin: 0 0 5px 0;
+            text-shadow: 0 0 30px var(--accent);
+        }
+        
+        .card-subtitle {
+            font-size: 12px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase;
+            display: block; margin-bottom: 25px;
+        }
+
+        .btn-link {
+            display: inline-block;
+            text-decoration: none;
+            color: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 28px;
+            font-size: 10px; letter-spacing: 3px; text-transform: uppercase; font-weight: bold;
+            transition: all 0.3s;
+            margin: 0 5px;
+        }
+        
+        .btn-link:hover {
+            background: white; color: black; box-shadow: 0 0 25px rgba(255,255,255,0.4);
+        }
+
+        /* --- PHOTO MODAL --- */
+        #photo-modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            z-index: 50; background: black;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.8s;
+        }
+        
+        #photo-modal img { 
+            max-width: 85vw; max-height: 70vh; 
+            box-shadow: 0 0 100px rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        #photo-details {
+            margin-top: 30px; text-align: center;
+            transform: translateY(20px); transition: transform 0.8s;
+        }
+        
+        #photo-title { font-size: 24px; letter-spacing: 4px; margin-bottom: 20px; font-weight: 300; }
+
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        <header>
+            <div>
+                <h1>Stellar</h1>
+                <div class="subtitle">Deep Space Observatory</div>
+            </div>
+            
+            <div class="controls">
+                <button class="mode-btn active" onclick="setMode('draw')">Draw</button>
+                <button class="mode-btn" onclick="setMode('color')">Spectrum</button>
+            </div>
+        </header>
+
+        <div id="status-area">
+            <div id="status-msg">Draw to Scan</div>
+        </div>
+
+        <div id="result-container">
+            <div id="match-card" class="info-card">
+                <h2 class="card-title" id="card-h2">ORION</h2>
+                <span class="card-subtitle" id="card-sub">The Hunter</span>
+                <a href="#" target="_blank" class="btn-link" id="btn-main">Explore Data</a>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <div id="spectrum-overlay"></div>
+    
+    <div id="photo-modal">
+        <img id="reveal-img" src="">
+        <div id="photo-details">
+            <div id="photo-title">Title</div>
+            <button class="btn-link" onclick="closePhoto()">Close View</button>
+            <a id="photo-source-link" href="#" target="_blank" class="btn-link">Original Source ↗</a>
+        </div>
+    </div>
+
+<script>
+    // ==========================================
+    // 1. DATASETS
+    // ==========================================
+    
+    // CONSTELLATIONS (Normalized Geometry)
+    const constellations = [
+        {
+            name: "Centaurus",
+            latin: "The Centaur",
+            slug: "centaurus", 
+            // Updated to match the screenshot skeleton (Torso + 2 front + 2 back + spear)
+            points: [
+                [0.7, 0.2], [0.6, 0.4], [0.5, 0.6], // Spear Arm
+                [0.5, 0.6], [0.5, 0.75], [0.4, 0.9], // Front Leg
+                [0.5, 0.75], [0.7, 0.8], [0.8, 0.95], // Back Leg
+                [0.5, 0.6], [0.4, 0.3], [0.35, 0.2], // Head/Torso
+                [0.2, 0.45], [0.8, 0.35] // The Spear Line
+            ],
+            color: "#e0f2fe"
+        },
+        {
+            name: "Orion",
+            latin: "The Hunter",
+            slug: "orion",
+            points: [[0.2, 0.1], [0.3, 0.4], [0.5, 0.4], [0.7, 0.4], [0.8, 0.1], [0.5, 0.4], [0.5, 0.8]], 
+            color: "#38bdf8"
+        },
+        {
+            name: "Ursa Major",
+            latin: "The Great Bear",
+            slug: "ursa-major",
+            points: [[0.1, 0.3], [0.3, 0.4], [0.5, 0.5], [0.5, 0.8], [0.8, 0.8], [0.8, 0.5], [0.5, 0.5]],
+            color: "#f0abfc"
+        },
+        {
+            name: "Scorpius",
+            latin: "The Scorpion",
+            slug: "scorpius",
+            points: [[0.2, 0.1], [0.25, 0.3], [0.3, 0.5], [0.5, 0.8], [0.8, 0.9], [0.9, 0.7]],
+            color: "#fda4af"
+        },
+        {
+            name: "Cassiopeia",
+            latin: "The Queen",
+            slug: "cassiopeia",
+            points: [[0.1, 0.1], [0.3, 0.8], [0.5, 0.4], [0.7, 0.8], [0.9, 0.1]],
+            color: "#fde047"
+        },
+        {
+            name: "Crux",
+            latin: "Southern Cross",
+            slug: "crux",
+            points: [[0.5, 0.1], [0.5, 0.9], [0.2, 0.5], [0.8, 0.4]],
+            color: "#ffffff"
+        }
+    ];
+
+    // SPECTRUM PHOTOS (Flickr / NASA Sources)
+    // Hues: 0=Red, 30=Orange, 60=Yellow, 120=Green, 180=Cyan, 240=Blue, 280=Purple, 300=Magenta
+    const spectrumData = [
+        { 
+            hue: 10, range: 15, // Red/Orange
+            name: "Carina Nebula", 
+            url: "https://live.staticflickr.com/65535/52259221868_cb4132049e_k.jpg", 
+            source: "https://www.flickr.com/photos/nasawebbtelescope/52259221868/" 
+        },
+        { 
+            hue: 35, range: 15, // Orange/Gold
+            name: "Cosmic Reef", 
+            url: "https://live.staticflickr.com/65535/49813474726_f2a249c5bb_k.jpg", 
+            source: "https://www.flickr.com/photos/nasahubble/49813474726/" 
+        },
+        { 
+            hue: 130, range: 30, // Greenish/Teal
+            name: "Bubble Nebula", 
+            url: "https://live.staticflickr.com/1454/26537703882_a248f323a6_k.jpg", 
+            source: "https://www.flickr.com/photos/nasahubble/26537703882/" 
+        },
+        { 
+            hue: 200, range: 25, // Cyan/Blue
+            name: "Southern Ring Nebula", 
+            url: "https://live.staticflickr.com/65535/52211466039_622e7d6928_k.jpg", 
+            source: "https://www.flickr.com/photos/nasawebbtelescope/52211466039/" 
+        },
+        { 
+            hue: 240, range: 20, // Deep Blue
+            name: "Lagoon Nebula", 
+            url: "https://live.staticflickr.com/902/40228800170_0720516f44_k.jpg", 
+            source: "https://www.flickr.com/photos/nasahubble/40228800170/" 
+        },
+        { 
+            hue: 280, range: 20, // Purple
+            name: "Tarantula Nebula", 
+            url: "https://live.staticflickr.com/65535/52336343542_d4b9b942f9_k.jpg", 
+            source: "https://www.flickr.com/photos/nasawebbtelescope/52336343542/" 
+        }
+    ];
+
+    // ==========================================
+    // 2. APP STATE
+    // ==========================================
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const statusMsg = document.getElementById('status-msg');
+    const matchCard = document.getElementById('match-card');
+    let width, height;
+    let mode = 'draw';
+    
+    // Resize Handle
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        if(mode === 'draw') drawStarField();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Mode Switcher
+    function setMode(newMode) {
+        mode = newMode;
+        
+        // Update Buttons
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.innerText.toLowerCase().includes(mode));
+        });
+
+        const spectrum = document.getElementById('spectrum-overlay');
+        
+        if (mode === 'draw') {
+            spectrum.style.opacity = 0;
+            canvas.style.pointerEvents = 'auto';
+            statusMsg.innerText = "DRAW TO SCAN";
+            matchCard.classList.remove('visible');
+            drawStarField();
+        } else {
+            spectrum.style.opacity = 1;
+            canvas.style.pointerEvents = 'none'; // Pass clicks to body for spectrum
+            statusMsg.innerText = "EXPLORE SPECTRUM";
+            matchCard.classList.remove('visible');
+        }
+    }
+
+    // ==========================================
+    // 3. DRAWING ENGINE (Multi-Stroke)
+    // ==========================================
+    let isDrawing = false;
+    let strokes = []; 
+    let currentStroke = [];
+    let drawTimer = null;
+
+    canvas.addEventListener('mousedown', startStroke);
+    canvas.addEventListener('mousemove', moveStroke);
+    canvas.addEventListener('mouseup', endStroke);
+    canvas.addEventListener('touchstart', (e) => startStroke(e.touches[0]));
+    canvas.addEventListener('touchmove', (e) => moveStroke(e.touches[0]));
+    canvas.addEventListener('touchend', endStroke);
+
+    function startStroke(e) {
+        if(mode !== 'draw') return;
+        if(drawTimer) clearTimeout(drawTimer);
+        
+        if(strokes.length === 0 && matchCard.classList.contains('visible')) {
+            matchCard.classList.remove('visible'); // Reset on new draw
+            drawStarField();
+        }
+
+        isDrawing = true;
+        currentStroke = [{x: e.clientX, y: e.clientY}];
+        statusMsg.style.opacity = 0.2;
+        
+        ctx.beginPath();
+        ctx.moveTo(e.clientX, e.clientY);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'white';
+    }
+
+    function moveStroke(e) {
+        if(!isDrawing) return;
+        const p = {x: e.clientX, y: e.clientY};
+        currentStroke.push(p);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+    }
+
+    function endStroke() {
+        if(!isDrawing) return;
+        isDrawing = false;
+        ctx.shadowBlur = 0;
+        
+        if(currentStroke.length > 5) strokes.push(currentStroke);
+        
+        // Wait 1.2s for user to draw another line (e.g. for legs/arms)
+        drawTimer = setTimeout(analyzeDrawing, 1200);
+    }
+
+    // ==========================================
+    // 4. MATCHING ALGORITHM
+    // ==========================================
+    function analyzeDrawing() {
+        if(strokes.length === 0) return;
+        statusMsg.style.opacity = 1;
+        statusMsg.innerText = "ANALYZING...";
+
+        // Flatten strokes for simple density matching
+        let flatPoints = strokes.flat();
+        
+        // Normalize user drawing to 0-1
+        const userNorm = normalize(flatPoints);
+        
+        // Compare
+        let bestMatch = null;
+        let bestScore = Infinity;
+
+        constellations.forEach(c => {
+            // Compare shape density (simplified Procrustes-like analysis)
+            const userResampled = resample(userNorm, 40);
+            const dbResampled = resample(c.points.map(p=>({x:p[0], y:p[1]})), 40);
+            const score = compare(userResampled, dbResampled);
+            
+            if(score < bestScore) {
+                bestScore = score;
+                bestMatch = c;
+            }
+        });
+
+        // Threshold (Loose enough for sketches)
+        if(bestScore < 0.5) {
+            showMatch(bestMatch);
+            statusMsg.innerText = "MATCH CONFIRMED";
+        } else {
+            statusMsg.innerText = "NO SIGNAL FOUND";
+            setTimeout(() => {
+                if(!isDrawing) {
+                    strokes = [];
+                    drawStarField();
+                    statusMsg.innerText = "DRAW TO SCAN";
+                }
+            }, 2000);
+        }
+        strokes = []; // Clear memory
+    }
+
+    function showMatch(data) {
+        // Clear canvas
+        drawStarField();
+        
+        // Draw Ideal Shape
+        const scale = Math.min(width, height) * 0.4;
+        const cx = width/2, cy = height/2;
+        
+        ctx.strokeStyle = data.color;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = data.color;
+        ctx.shadowBlur = 25;
+        
+        ctx.beginPath();
+        data.points.forEach((p, i) => {
+            const x = (p[0] * scale) + (cx - scale/2);
+            const y = (p[1] * scale) + (cy - scale/2);
+            if(i===0) ctx.moveTo(x,y);
+            else ctx.lineTo(x,y);
+            
+            // Draw Star Joint
+            ctx.fillStyle = "white";
+            ctx.fillRect(x-2, y-2, 4, 4);
+        });
+        ctx.stroke();
+
+        // UI Update
+        document.getElementById('card-h2').innerText = data.name;
+        document.getElementById('card-h2').style.textShadow = `0 0 30px ${data.color}`;
+        document.getElementById('card-sub').innerText = data.latin;
+        document.getElementById('card-sub').style.color = data.color;
+        
+        const btn = document.getElementById('btn-main');
+        btn.href = `https://noirlab.edu/public/education/constellations/${data.slug}/`;
+        btn.innerText = "EXPLORE DATA ↗";
+        
+        matchCard.classList.add('visible');
+    }
+
+    // Geometry Helpers
+    function normalize(points) {
+        let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+        points.forEach(p => {
+            minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+            minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+        });
+        const w = maxX - minX || 1; 
+        const h = maxY - minY || 1;
+        return points.map(p => ({ x: (p.x - minX)/w, y: (p.y - minY)/h }));
+    }
+    
+    function resample(points, n) {
+        const res = [];
+        if(points.length===0) return [];
+        for(let i=0; i<n; i++) {
+            const idx = Math.floor(i * (points.length-1) / (n-1));
+            res.push(points[idx]);
+        }
+        return res;
+    }
+    
+    function compare(a, b) {
+        let sum = 0;
+        for(let i=0; i<a.length; i++) {
+            const dx = a[i].x - b[i].x;
+            const dy = a[i].y - b[i].y;
+            sum += (dx*dx + dy*dy);
+        }
+        return sum / a.length;
+    }
+
+
+    // ==========================================
+    // 5. SPECTRUM MODE (Optimized)
+    // ==========================================
+    
+    // Mouse Move: Gradient Preview
+    document.addEventListener('mousemove', (e) => {
+        if(mode !== 'color') return;
+        
+        const xPct = e.clientX / width;
+        const hue = Math.floor(xPct * 360);
+        
+        // Show gradient flashlight
+        const spectrum = document.getElementById('spectrum-overlay');
+        spectrum.style.background = `radial-gradient(circle at ${e.clientX}px ${e.clientY}px, hsla(${hue}, 80%, 60%, 0.3) 0%, black 50%)`;
+        
+        statusMsg.style.color = `hsl(${hue}, 80%, 70%)`;
+        statusMsg.innerText = `FREQ: ${hue}Hz`;
+    });
+
+    // Double Click: Lock & Load
+    document.addEventListener('dblclick', (e) => {
+        if(mode !== 'color') return;
+        
+        const xPct = e.clientX / width;
+        const targetHue = Math.floor(xPct * 360);
+        
+        // Find best match within tolerance
+        let best = null;
+        let minDist = Infinity;
+        
+        spectrumData.forEach(item => {
+            let dist = Math.abs(item.hue - targetHue);
+            // Handle wrap-around (Red at 0 and 360)
+            if(dist > 180) dist = 360 - dist;
+            
+            if(dist < minDist) {
+                minDist = dist;
+                best = item;
+            }
+        });
+
+        // Tolerance check (Don't match if too far)
+        if(best && minDist < best.range) {
+            openPhoto(best);
+        } else {
+            statusMsg.innerText = "NO SIGNAL DETECTED";
+            statusMsg.style.color = "white";
+        }
+    });
+
+    function openPhoto(data) {
+        const modal = document.getElementById('photo-modal');
+        const img = document.getElementById('reveal-img');
+        const title = document.getElementById('photo-title');
+        const sourceLink = document.getElementById('photo-source-link');
+        
+        img.src = data.url;
+        title.innerText = data.name;
+        sourceLink.href = data.source;
+        
+        modal.style.opacity = 1;
+        modal.style.pointerEvents = "auto";
+    }
+
+    function closePhoto() {
+        const modal = document.getElementById('photo-modal');
+        modal.style.opacity = 0;
+        modal.style.pointerEvents = "none";
+    }
+
+
+    // ==========================================
+    // 6. BACKGROUND VISUALS
+    // ==========================================
+    function drawStarField() {
+        ctx.clearRect(0,0,width,height);
+        ctx.fillStyle = "white";
+        
+        // Create static stars
+        for(let i=0; i<300; i++) {
+            const x = Math.random()*width;
+            const y = Math.random()*height;
+            const r = Math.random() * 1.5;
+            const alpha = Math.random();
+            
+            ctx.globalAlpha = alpha * 0.8 + 0.1;
+            ctx.beginPath();
+            ctx.arc(x,y,r,0,Math.PI*2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+</script>
+</body>
+</html>

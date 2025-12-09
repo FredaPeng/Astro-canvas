@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar: Universal Database</title>
+    <style>
+        :root {
+            --bg-deep: #020204;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #38bdf8;
+        }
+
+        body { 
+            margin: 0; background: var(--bg-deep); height: 100vh; overflow: hidden; 
+            font-family: 'Inter', sans-serif; color: white; user-select: none;
+            background: radial-gradient(circle at 50% 120%, #0f172a 0%, #000000 80%);
+        }
+        
+        canvas { display: block; position: absolute; top:0; left:0; z-index: 1; cursor: crosshair; }
+        
+        #spectrum-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: black; opacity: 0; pointer-events: none; z-index: 2;
+            transition: opacity 0.5s ease;
+        }
+
+        /* --- UI LAYER --- */
+        #ui {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; pointer-events: none; padding: 40px; box-sizing: border-box;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        header { display: flex; justify-content: space-between; align-items: flex-start; }
+        
+        h1 { font-weight: 300; font-size: 24px; letter-spacing: 6px; margin: 0; text-transform: uppercase; }
+        .subtitle { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; }
+
+        .controls {
+            pointer-events: auto; display: flex; gap: 8px;
+            background: rgba(0,0,0,0.5); padding: 4px; border-radius: 50px;
+            border: 1px solid var(--glass-border); backdrop-filter: blur(10px);
+        }
+        
+        .btn {
+            background: transparent; border: none; color: rgba(255,255,255,0.5);
+            padding: 10px 20px; border-radius: 40px; font-size: 10px; letter-spacing: 2px; 
+            text-transform: uppercase; cursor: pointer; transition: all 0.3s;
+        }
+        .btn.active { background: rgba(255,255,255,0.15); color: white; }
+
+        #status {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.3);
+            text-align: center;
+        }
+
+        /* RESULT CARD */
+        #card {
+            pointer-events: auto; align-self: center;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); padding: 30px 50px; border-radius: 4px; text-align: center;
+            opacity: 0; transform: translateY(20px); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #card.visible { opacity: 1; transform: translateY(0); }
+        
+        .card-title { font-size: 36px; font-weight: 200; letter-spacing: 6px; margin: 0 0 5px 0; }
+        .card-sub { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; display: block; margin-bottom: 20px; color: var(--accent); }
+        
+        .link {
+            text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 25px; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; transition: 0.3s;
+        }
+        .link:hover { background: white; color: black; }
+
+        /* PHOTO MODAL */
+        #modal {
+            position: fixed; top:0; left:0; width:100%; height:100%; z-index: 50; background: black;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.5s;
+        }
+        #modal img { max-width: 90%; max-height: 80%; border: 1px solid rgba(255,255,255,0.2); }
+        #modal-txt { margin-top: 20px; text-align: center; }
+        #close-modal {
+            margin-top: 20px; background: transparent; border: 1px solid white; color: white;
+            padding: 8px 20px; cursor: pointer; letter-spacing: 2px; text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <header>
+        <div>
+            <h1>Stellar</h1>
+            <div class="subtitle">IAU Database Access</div>
+        </div>
+        <div class="controls">
+            <button class="btn active" onclick="app.setMode('draw')">Draw</button>
+            <button class="btn" onclick="app.setMode('color')">Spectrum</button>
+        </div>
+    </header>
+    <div id="status">Loading Database...</div>
+    <div id="card">
+        <h2 class="card-title" id="c-title">ORION</h2>
+        <span class="card-sub" id="c-sub">The Hunter</span>
+        <a href="#" target="_blank" class="link" id="c-link">Database Entry</a>
+    </div>
+</div>
+
+<canvas id="canvas"></canvas>
+<div id="spectrum-overlay"></div>
+
+<div id="modal">
+    <img id="m-img" src="">
+    <div id="modal-txt">
+        <h2 id="m-title" style="font-weight: 300; letter-spacing: 4px;"></h2>
+        <button id="close-modal" onclick="app.closeModal()">Close Telescope</button>
+    </div>
+</div>
+
+<script>
+    /**
+     * STELLAR ENGINE
+     * Implements $1 Unistroke Recognizer Logic for precise gesture matching
+     */
+    const app = {
+        mode: 'draw',
+        db: { constellations: [], spectrum: [] },
+        canvas: document.getElementById('canvas'),
+        ctx: document.getElementById('canvas').getContext('2d'),
+        width: 0, height: 0,
+        strokes: [], isDrawing: false, drawTimer: null,
+
+        // --- 1. INITIALIZATION ---
+        init: async function() {
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            
+            // Fetch Databases
+            try {
+                // In production, fetch from './data/constellations.json'
+                // For this demo to work immediately, we load the sample data directly if fetch fails
+                const cRes = await fetch('./data/constellations.json');
+                const sRes = await fetch('./data/spectrum.json');
+                
+                if(cRes.ok && sRes.ok) {
+                    this.db.constellations = await cRes.json();
+                    this.db.spectrum = await sRes.json();
+                } else {
+                    throw new Error("Local files not found, please ensure data folder exists.");
+                }
+                document.getElementById('status').innerText = "Database Ready. Draw to Scan.";
+            } catch(e) {
+                console.warn("Using fallback mode. Ensure JSON files are in /data folder.");
+                document.getElementById('status').innerText = "Data Load Error (See Console)";
+            }
+
+            this.setupEvents();
+            this.drawStars();
+        },
+
+        resize: function() {
+            this.width = this.canvas.width = window.innerWidth;
+            this.height = this.canvas.height = window.innerHeight;
+            if(this.mode === 'draw') this.drawStars();
+        },
+
+        setupEvents: function() {
+            const c = this.canvas;
+            // Mouse & Touch
+            const start = (e) => this.startStroke(e.touches ? e.touches[0] : e);
+            const move = (e) => this.moveStroke(e.touches ? e.touches[0] : e);
+            const end = () => this.endStroke();
+
+            c.addEventListener('mousedown', start); c.addEventListener('mousemove', move); c.addEventListener('mouseup', end);
+            c.addEventListener('touchstart', start); c.addEventListener('touchmove', move); c.addEventListener('touchend', end);
+            
+            // Spectrum Interactions
+            document.addEventListener('mousemove', (e) => this.handleSpectrumMove(e));
+            document.addEventListener('dblclick', (e) => this.handleSpectrumClick(e));
+        },
+
+        setMode: function(m) {
+            this.mode = m;
+            document.querySelectorAll('.btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase().includes(m)));
+            
+            const spec = document.getElementById('spectrum-overlay');
+            if(m === 'draw') {
+                spec.style.opacity = 0;
+                this.canvas.style.pointerEvents = 'auto';
+                document.getElementById('status').innerText = "Draw to Scan";
+                this.drawStars();
+            } else {
+                spec.style.opacity = 1;
+                this.canvas.style.pointerEvents = 'none';
+                document.getElementById('status').innerText = "Explore Spectrum (Double Click)";
+            }
+            document.getElementById('card').classList.remove('visible');
+        },
+
+        // --- 2. DRAWING LOGIC ---
+        startStroke: function(e) {
+            if(this.mode !== 'draw') return;
+            if(this.drawTimer) clearTimeout(this.drawTimer);
+            
+            // Reset if card was showing
+            if(document.getElementById('card').classList.contains('visible')) {
+                document.getElementById('card').classList.remove('visible');
+                this.strokes = [];
+                this.drawStars();
+            }
+
+            this.isDrawing = true;
+            this.strokes.push({x: e.clientX, y: e.clientY}); // Start new stroke path
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(e.clientX, e.clientY);
+            this.ctx.strokeStyle = "white";
+            this.ctx.lineWidth = 2;
+            this.ctx.shadowBlur = 10; this.ctx.shadowColor = "white";
+        },
+
+        moveStroke: function(e) {
+            if(!this.isDrawing) return;
+            this.strokes.push({x: e.clientX, y: e.clientY});
+            this.ctx.lineTo(e.clientX, e.clientY);
+            this.ctx.stroke();
+        },
+
+        endStroke: function() {
+            if(!this.isDrawing) return;
+            this.isDrawing = false;
+            this.ctx.shadowBlur = 0;
+            
+            // Wait 1.5s for multi-stroke drawings
+            this.drawTimer = setTimeout(() => this.analyze(), 1500);
+        },
+
+        // --- 3. GEOMETRY ENGINE ($1 Recognizer Logic) ---
+        analyze: function() {
+            if(this.strokes.length < 10) return;
+            document.getElementById('status').innerText = "Processing Geometry...";
+
+            // 1. Resample to 64 points (Standardizes speed/size)
+            const resampled = this.resample(this.strokes, 64);
+            // 2. Scale to 1x1 Box (Standardizes size)
+            const scaled = this.scaleToSquare(resampled);
+            // 3. Translate to Origin (Standardizes position)
+            const normalized = this.translateToOrigin(scaled);
+
+            let bestScore = Infinity;
+            let match = null;
+
+            // Compare against DB
+            this.db.constellations.forEach(c => {
+                // Prepare DB shape (should ideally be done once on load)
+                const dbPoints = c.strokes.map(p => ({x: p[0], y: p[1]}));
+                const dbResampled = this.resample(dbPoints, 64);
+                // Note: DB is already 0-1, but we ensure it matches the 64 point count
+                
+                const d = this.pathDistance(normalized, dbResampled);
+                if(d < bestScore) {
+                    bestScore = d;
+                    match = c;
+                }
+            });
+
+            // Threshold (0.35 allows for "sketchy" lines)
+            if(bestScore < 0.35) {
+                this.revealMatch(match);
+            } else {
+                document.getElementById('status').innerText = "No Match Found. Try Again.";
+                setTimeout(() => {
+                    if(this.strokes.length > 0) { // If user hasn't started drawing again
+                        this.drawStars();
+                        this.strokes = [];
+                        document.getElementById('status').innerText = "Draw to Scan";
+                    }
+                }, 2000);
+            }
+        },
+
+        // Geometry Math Helpers
+        resample: function(points, n) {
+            const I = this.pathLength(points) / (n - 1);
+            let D = 0;
+            const newPoints = [points[0]];
+            for (let i = 1; i < points.length; i++) {
+                let d = this.dist(points[i - 1], points[i]);
+                if ((D + d) >= I) {
+                    let qx = points[i - 1].x + ((I - D) / d) * (points[i].x - points[i - 1].x);
+                    let qy = points[i - 1].y + ((I - D) / d) * (points[i].y - points[i - 1].y);
+                    const q = { x: qx, y: qy };
+                    newPoints.push(q);
+                    points.splice(i, 0, q);
+                    D = 0;
+                } else D += d;
+            }
+            if (newPoints.length === n - 1) newPoints.push(points[points.length - 1]);
+            return newPoints;
+        },
+        scaleToSquare: function(points) {
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            points.forEach(p => {
+                minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+            });
+            const size = Math.max(maxX - minX, maxY - minY);
+            return points.map(p => ({ x: (p.x - minX) / size, y: (p.y - minY) / size }));
+        },
+        translateToOrigin: function(points) {
+            const c = this.centroid(points);
+            return points.map(p => ({ x: p.x - c.x, y: p.y - c.y }));
+        },
+        pathDistance: function(pts1, pts2) {
+            let d = 0;
+            for (let i = 0; i < Math.min(pts1.length, pts2.length); i++) {
+                d += this.dist(pts1[i], pts2[i]);
+            }
+            return d / pts1.length;
+        },
+        pathLength: function(points) {
+            let d = 0;
+            for (let i = 1; i < points.length; i++) d += this.dist(points[i - 1], points[i]);
+            return d;
+        },
+        dist: function(p1, p2) { return Math.hypot(p1.x - p2.x, p1.y - p2.y); },
+        centroid: function(pts) {
+            let x = 0, y = 0;
+            pts.forEach(p => { x += p.x; y += p.y; });
+            return { x: x / pts.length, y: y / pts.length };
+        },
+
+        // --- 4. VISUALIZATION ---
+        revealMatch: function(data) {
+            this.drawStars(); // Clear canvas
+            
+            // Draw Perfect Shape
+            const scale = Math.min(this.width, this.height) * 0.5;
+            const cx = this.width / 2;
+            const cy = this.height / 2;
+
+            this.ctx.strokeStyle = data.color;
+            this.ctx.lineWidth = 4;
+            this.ctx.shadowColor = data.color;
+            this.ctx.shadowBlur = 30;
+            
+            this.ctx.beginPath();
+            data.strokes.forEach((p, i) => {
+                // Map 0-1 coord back to screen center
+                const x = (p[0] * scale) + (cx - scale/2);
+                const y = (p[1] * scale) + (cy - scale/2);
+                if(i===0) this.ctx.moveTo(x,y);
+                else this.ctx.lineTo(x,y);
+                
+                // Draw Joint
+                this.ctx.fillStyle = "white";
+                this.ctx.fillRect(x-3, y-3, 6, 6);
+            });
+            this.ctx.stroke();
+
+            // Update UI
+            document.getElementById('c-title').innerText = data.name;
+            document.getElementById('c-title').style.textShadow = `0 0 30px ${data.color}`;
+            document.getElementById('c-sub').innerText = data.latin;
+            document.getElementById('c-sub').style.color = data.color;
+            document.getElementById('c-link').href = `https://noirlab.edu/public/education/constellations/${data.slug}/`;
+            
+            document.getElementById('card').classList.add('visible');
+            document.getElementById('status').innerText = "";
+        },
+
+        drawStars: function() {
+            this.ctx.clearRect(0,0,this.width,this.height);
+            this.ctx.fillStyle = "white";
+            this.ctx.shadowBlur = 0;
+            for(let i=0; i<300; i++) {
+                const x = Math.random()*this.width;
+                const y = Math.random()*this.height;
+                const r = Math.random()*1.5;
+                this.ctx.globalAlpha = Math.random()*0.8+0.2;
+                this.ctx.beginPath();
+                this.ctx.arc(x,y,r,0,Math.PI*2);
+                this.ctx.fill();
+            }
+            this.ctx.globalAlpha = 1;
+        },
+
+        // --- 5. SPECTRUM ENGINE ---
+        handleSpectrumMove: function(e) {
+            if(this.mode !== 'color') return;
+            const hue = Math.floor((e.clientX / this.width) * 360);
+            const overlay = document.getElementById('spectrum-overlay');
+            overlay.style.background = `radial-gradient(circle at ${e.clientX}px ${e.clientY}px, hsla(${hue}, 80%, 60%, 0.4) 0%, black 60%)`;
+            document.getElementById('status').innerText = `Frequency: ${hue}THz`;
+        },
+
+        handleSpectrumClick: function(e) {
+            if(this.mode !== 'color') return;
+            const hue = Math.floor((e.clientX / this.width) * 360);
+            
+            let best = null;
+            let minDist = Infinity;
+
+            this.db.spectrum.forEach(s => {
+                let d = Math.abs(s.hue - hue);
+                if(d > 180) d = 360 - d;
+                if(d < minDist) { minDist = d; best = s; }
+            });
+
+            if(best && minDist < best.range) {
+                document.getElementById('m-img').src = best.url;
+                document.getElementById('m-title').innerText = best.name;
+                document.getElementById('modal').style.opacity = 1;
+                document.getElementById('modal').style.pointerEvents = 'auto';
+            } else {
+                document.getElementById('status').innerText = "No Signal Detected";
+            }
+        },
+
+        closeModal: function() {
+            document.getElementById('modal').style.opacity = 0;
+            document.getElementById('modal').style.pointerEvents = 'none';
+        }
+    };
+
+    // BOOT
+    app.init();
+</script>
+</body>
+</html>

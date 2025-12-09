@@ -1,0 +1,794 @@
+[
+  {
+    "id": "andromeda",
+    "name": "Andromeda",
+    "latin": "Andromeda",
+    "slug": "andromeda",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#e0f2fe"
+  },
+  {
+    "id": "antlia",
+    "name": "Antlia",
+    "latin": "The Air Pump",
+    "slug": "antlia",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#38bdf8"
+  },
+  {
+    "id": "apus",
+    "name": "Apus",
+    "latin": "Bird of Paradise",
+    "slug": "apus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#f0abfc"
+  },
+  {
+    "id": "aquarius",
+    "name": "Aquarius",
+    "latin": "Water Bearer",
+    "slug": "aquarius",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fda4af"
+  },
+  {
+    "id": "aquila",
+    "name": "Aquila",
+    "latin": "Eagle",
+    "slug": "aquila",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fde047"
+  },
+  {
+    "id": "ara",
+    "name": "Ara",
+    "latin": "Altar",
+    "slug": "ara",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#ffffff"
+  },
+  {
+    "id": "aries",
+    "name": "Aries",
+    "latin": "Ram",
+    "slug": "aries",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#a78bfa"
+  },
+  {
+    "id": "auriga",
+    "name": "Auriga",
+    "latin": "Charioteer",
+    "slug": "auriga",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#60a5fa"
+  },
+  {
+    "id": "bootes",
+    "name": "Boötes",
+    "latin": "Herdsman",
+    "slug": "bootes",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fb7185"
+  },
+  {
+    "id": "caelum",
+    "name": "Caelum",
+    "latin": "Chisel",
+    "slug": "caelum",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#34d399"
+  },
+  {
+    "id": "camelopardalis",
+    "name": "Camelopardalis",
+    "latin": "Giraffe",
+    "slug": "camelopardalis",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#e0f2fe"
+  },
+  {
+    "id": "cancer",
+    "name": "Cancer",
+    "latin": "Crab",
+    "slug": "cancer",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#38bdf8"
+  },
+  {
+    "id": "canes-venatici",
+    "name": "Canes Venatici",
+    "latin": "Hunting Dogs",
+    "slug": "canes-venatici",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#f0abfc"
+  },
+  {
+    "id": "canis-major",
+    "name": "Canis Major",
+    "latin": "Greater Dog",
+    "slug": "canis-major",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fda4af"
+  },
+  {
+    "id": "canis-minor",
+    "name": "Canis Minor",
+    "latin": "Lesser Dog",
+    "slug": "canis-minor",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fde047"
+  },
+  {
+    "id": "capricornus",
+    "name": "Capricornus",
+    "latin": "Horned Goat",
+    "slug": "capricornus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#ffffff"
+  },
+  {
+    "id": "carina",
+    "name": "Carina",
+    "latin": "Keel",
+    "slug": "carina",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#a78bfa"
+  },
+  {
+    "id": "cassiopeia",
+    "name": "Cassiopeia",
+    "latin": "The Queen",
+    "slug": "cassiopeia",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#60a5fa"
+  },
+  {
+    "id": "centaurus",
+    "name": "Centaurus",
+    "latin": "The Centaur",
+    "slug": "centaurus",
+    "complexity": "hard",
+    "strokes": [],
+    "color": "#fb7185"
+  },
+  {
+    "id": "cepheus",
+    "name": "Cepheus",
+    "latin": "The King",
+    "slug": "cepheus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#34d399"
+  },
+  {
+    "id": "cetus",
+    "name": "Cetus",
+    "latin": "Whale",
+    "slug": "cetus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#e0f2fe"
+  },
+  {
+    "id": "chamaeleon",
+    "name": "Chamaeleon",
+    "latin": "Chameleon",
+    "slug": "chamaeleon",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#38bdf8"
+  },
+  {
+    "id": "circinus",
+    "name": "Circinus",
+    "latin": "Compass",
+    "slug": "circinus",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#f0abfc"
+  },
+  {
+    "id": "columba",
+    "name": "Columba",
+    "latin": "Dove",
+    "slug": "columba",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fda4af"
+  },
+  {
+    "id": "coma-berenices",
+    "name": "Coma Berenices",
+    "latin": "Berenice's Hair",
+    "slug": "coma-berenices",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fde047"
+  },
+  {
+    "id": "corona-australis",
+    "name": "Corona Australis",
+    "latin": "Southern Crown",
+    "slug": "corona-australis",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#ffffff"
+  },
+  {
+    "id": "corona-borealis",
+    "name": "Corona Borealis",
+    "latin": "Northern Crown",
+    "slug": "corona-borealis",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#a78bfa"
+  },
+  {
+    "id": "corvus",
+    "name": "Corvus",
+    "latin": "Crow",
+    "slug": "corvus",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#60a5fa"
+  },
+  {
+    "id": "crater",
+    "name": "Crater",
+    "latin": "Cup",
+    "slug": "crater",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fb7185"
+  },
+  {
+    "id": "crux",
+    "name": "Crux",
+    "latin": "Southern Cross",
+    "slug": "crux",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#34d399"
+  },
+  {
+    "id": "cygnus",
+    "name": "Cygnus",
+    "latin": "Swan",
+    "slug": "cygnus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#e0f2fe"
+  },
+  {
+    "id": "delphinus",
+    "name": "Delphinus",
+    "latin": "Dolphin",
+    "slug": "delphinus",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#38bdf8"
+  },
+  {
+    "id": "dorado",
+    "name": "Dorado",
+    "latin": "Swordfish",
+    "slug": "dorado",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#f0abfc"
+  },
+  {
+    "id": "draco",
+    "name": "Draco",
+    "latin": "Dragon",
+    "slug": "draco",
+    "complexity": "hard",
+    "strokes": [],
+    "color": "#fda4af"
+  },
+  {
+    "id": "equuleus",
+    "name": "Equuleus",
+    "latin": "Little Horse",
+    "slug": "equuleus",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fde047"
+  },
+  {
+    "id": "eridanus",
+    "name": "Eridanus",
+    "latin": "River",
+    "slug": "eridanus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#ffffff"
+  },
+  {
+    "id": "fornax",
+    "name": "Fornax",
+    "latin": "Furnace",
+    "slug": "fornax",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#a78bfa"
+  },
+  {
+    "id": "gemini",
+    "name": "Gemini",
+    "latin": "Twins",
+    "slug": "gemini",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#60a5fa"
+  },
+  {
+    "id": "grus",
+    "name": "Grus",
+    "latin": "Crane",
+    "slug": "grus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fb7185"
+  },
+  {
+    "id": "hercules",
+    "name": "Hercules",
+    "latin": "Hercules",
+    "slug": "hercules",
+    "complexity": "hard",
+    "strokes": [],
+    "color": "#34d399"
+  },
+  {
+    "id": "horologium",
+    "name": "Horologium",
+    "latin": "Clock",
+    "slug": "horologium",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#e0f2fe"
+  },
+  {
+    "id": "hydra",
+    "name": "Hydra",
+    "latin": "Sea Serpent",
+    "slug": "hydra",
+    "complexity": "hard",
+    "strokes": [],
+    "color": "#38bdf8"
+  },
+  {
+    "id": "hydrus",
+    "name": "Hydrus",
+    "latin": "Water Snake",
+    "slug": "hydrus",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#f0abfc"
+  },
+  {
+    "id": "indus",
+    "name": "Indus",
+    "latin": "Indian",
+    "slug": "indus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fda4af"
+  },
+  {
+    "id": "lacerta",
+    "name": "Lacerta",
+    "latin": "Lizard",
+    "slug": "lacerta",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fde047"
+  },
+  {
+    "id": "leo",
+    "name": "Leo",
+    "latin": "Lion",
+    "slug": "leo",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#ffffff"
+  },
+  {
+    "id": "leo-minor",
+    "name": "Leo Minor",
+    "latin": "Little Lion",
+    "slug": "leo-minor",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#a78bfa"
+  },
+  {
+    "id": "lepus",
+    "name": "Lepus",
+    "latin": "Hare",
+    "slug": "lepus",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#60a5fa"
+  },
+  {
+    "id": "libra",
+    "name": "Libra",
+    "latin": "Scales",
+    "slug": "libra",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fb7185"
+  },
+  {
+    "id": "lupus",
+    "name": "Lupus",
+    "latin": "Wolf",
+    "slug": "lupus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#34d399"
+  },
+  {
+    "id": "lynx",
+    "name": "Lynx",
+    "latin": "Lynx",
+    "slug": "lynx",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#e0f2fe"
+  },
+  {
+    "id": "lyra",
+    "name": "Lyra",
+    "latin": "Lyre",
+    "slug": "lyra",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#38bdf8"
+  },
+  {
+    "id": "mensa",
+    "name": "Mensa",
+    "latin": "Table Mountain",
+    "slug": "mensa",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#f0abfc"
+  },
+  {
+    "id": "microscopium",
+    "name": "Microscopium",
+    "latin": "Microscope",
+    "slug": "microscopium",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fda4af"
+  },
+  {
+    "id": "monoceros",
+    "name": "Monoceros",
+    "latin": "Unicorn",
+    "slug": "monoceros",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fde047"
+  },
+  {
+    "id": "musca",
+    "name": "Musca",
+    "latin": "Fly",
+    "slug": "musca",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#ffffff"
+  },
+  {
+    "id": "norma",
+    "name": "Norma",
+    "latin": "Square",
+    "slug": "norma",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#a78bfa"
+  },
+  {
+    "id": "octans",
+    "name": "Octans",
+    "latin": "Octant",
+    "slug": "octans",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#60a5fa"
+  },
+  {
+    "id": "ophiuchus",
+    "name": "Ophiuchus",
+    "latin": "Serpent Bearer",
+    "slug": "ophiuchus",
+    "complexity": "hard",
+    "strokes": [],
+    "color": "#fb7185"
+  },
+  {
+    "id": "orion",
+    "name": "Orion",
+    "latin": "The Hunter",
+    "slug": "orion",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#34d399"
+  },
+  {
+    "id": "pavo",
+    "name": "Pavo",
+    "latin": "Peacock",
+    "slug": "pavo",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#e0f2fe"
+  },
+  {
+    "id": "pegasus",
+    "name": "Pegasus",
+    "latin": "Winged Horse",
+    "slug": "pegasus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#38bdf8"
+  },
+  {
+    "id": "perseus",
+    "name": "Perseus",
+    "latin": "Perseus",
+    "slug": "perseus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#f0abfc"
+  },
+  {
+    "id": "phoenix",
+    "name": "Phoenix",
+    "latin": "Phoenix",
+    "slug": "phoenix",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fda4af"
+  },
+  {
+    "id": "pictor",
+    "name": "Pictor",
+    "latin": "Painter's Easel",
+    "slug": "pictor",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fde047"
+  },
+  {
+    "id": "pisces",
+    "name": "Pisces",
+    "latin": "Fishes",
+    "slug": "pisces",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#ffffff"
+  },
+  {
+    "id": "piscis-austrinus",
+    "name": "Piscis Austrinus",
+    "latin": "Southern Fish",
+    "slug": "piscis-austrinus",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#a78bfa"
+  },
+  {
+    "id": "puppis",
+    "name": "Puppis",
+    "latin": "The Stern",
+    "slug": "puppis",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#60a5fa"
+  },
+  {
+    "id": "pyxis",
+    "name": "Pyxis",
+    "latin": "Compass Box",
+    "slug": "pyxis",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fb7185"
+  },
+  {
+    "id": "reticulum",
+    "name": "Reticulum",
+    "latin": "Net",
+    "slug": "reticulum",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#34d399"
+  },
+  {
+    "id": "sagitta",
+    "name": "Sagitta",
+    "latin": "Arrow",
+    "slug": "sagitta",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#e0f2fe"
+  },
+  {
+    "id": "sagittarius",
+    "name": "Sagittarius",
+    "latin": "Archer",
+    "slug": "sagittarius",
+    "complexity": "hard",
+    "strokes": [],
+    "color": "#38bdf8"
+  },
+  {
+    "id": "scorpius",
+    "name": "Scorpius",
+    "latin": "Scorpion",
+    "slug": "scorpius",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#f0abfc"
+  },
+  {
+    "id": "sculptor",
+    "name": "Sculptor",
+    "latin": "Sculptor",
+    "slug": "sculptor",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fda4af"
+  },
+  {
+    "id": "scutum",
+    "name": "Scutum",
+    "latin": "Shield",
+    "slug": "scutum",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fde047"
+  },
+  {
+    "id": "serpens",
+    "name": "Serpens",
+    "latin": "Serpent",
+    "slug": "serpens",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#ffffff"
+  },
+  {
+    "id": "sextans",
+    "name": "Sextans",
+    "latin": "Sextant",
+    "slug": "sextans",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#a78bfa"
+  },
+  {
+    "id": "taurus",
+    "name": "Taurus",
+    "latin": "Bull",
+    "slug": "taurus",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#60a5fa"
+  },
+  {
+    "id": "telescopium",
+    "name": "Telescopium",
+    "latin": "Telescope",
+    "slug": "telescopium",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fb7185"
+  },
+  {
+    "id": "triangulum",
+    "name": "Triangulum",
+    "latin": "Triangle",
+    "slug": "triangulum",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#34d399"
+  },
+  {
+    "id": "triangulum-australe",
+    "name": "Triangulum Australe",
+    "latin": "Southern Triangle",
+    "slug": "triangulum-australe",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#e0f2fe"
+  },
+  {
+    "id": "tucana",
+    "name": "Tucana",
+    "latin": "Toucan",
+    "slug": "tucana",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#38bdf8"
+  },
+  {
+    "id": "ursa-major",
+    "name": "Ursa Major",
+    "latin": "Great Bear",
+    "slug": "ursa-major",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#f0abfc"
+  },
+  {
+    "id": "ursa-minor",
+    "name": "Ursa Minor",
+    "latin": "Little Bear",
+    "slug": "ursa-minor",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#fda4af"
+  },
+  {
+    "id": "vela",
+    "name": "Vela",
+    "latin": "Sails",
+    "slug": "vela",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#fde047"
+  },
+  {
+    "id": "virgo",
+    "name": "Virgo",
+    "latin": "Virgin",
+    "slug": "virgo",
+    "complexity": "medium",
+    "strokes": [],
+    "color": "#ffffff"
+  },
+  {
+    "id": "volans",
+    "name": "Volans",
+    "latin": "Flying Fish",
+    "slug": "volans",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#a78bfa"
+  },
+  {
+    "id": "vulpecula",
+    "name": "Vulpecula",
+    "latin": "Little Fox",
+    "slug": "vulpecula",
+    "complexity": "easy",
+    "strokes": [],
+    "color": "#60a5fa"
+  }
+]

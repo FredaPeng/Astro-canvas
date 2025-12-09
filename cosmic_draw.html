@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar: Deep Space Edition</title>
+    <style>
+        :root {
+            --bg-deep: #020204;
+            --bg-grad: radial-gradient(circle at 50% 120%, #0f172a 0%, #000000 70%);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #38bdf8;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+
+        body { 
+            margin: 0; 
+            background: var(--bg-deep);
+            background-image: var(--bg-grad);
+            height: 100vh;
+            overflow: hidden; 
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; 
+            color: white;
+            user-select: none;
+        }
+        
+        /* --- VISUALS --- */
+        canvas { display: block; position: absolute; top:0; left:0; z-index: 1; cursor: crosshair; }
+        
+        #spectrum-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: black;
+            opacity: 0; transition: opacity 0.8s; pointer-events: none;
+            z-index: 2;
+        }
+
+        /* --- UI LAYER --- */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; pointer-events: none;
+            padding: 40px; box-sizing: border-box;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        /* HEADER */
+        header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        
+        h1 {
+            font-weight: 300; font-size: 28px; letter-spacing: 8px; margin: 0;
+            text-transform: uppercase; color: rgba(255,255,255,0.9);
+            text-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 11px; color: var(--text-muted); letter-spacing: 3px; margin-top: 8px;
+            text-transform: uppercase;
+        }
+
+        /* CONTROLS */
+        .controls {
+            pointer-events: auto;
+            display: flex; gap: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px; border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+        
+        .mode-btn {
+            background: transparent; border: none; color: var(--text-muted);
+            padding: 12px 24px; border-radius: 40px;
+            font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        
+        .mode-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+        .mode-btn.active { 
+            background: rgba(255,255,255,0.15); 
+            color: white; 
+            box-shadow: 0 0 20px rgba(255,255,255,0.05); 
+        }
+
+        /* CENTER STATUS TEXT */
+        #status-area {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; pointer-events: none; mix-blend-mode: screen;
+        }
+        
+        #status-msg {
+            font-size: 14px; letter-spacing: 4px; text-transform: uppercase;
+            color: rgba(255,255,255,0.3); transition: opacity 0.3s;
+        }
+
+        /* RESULT CARD (Bottom) */
+        #result-container {
+            width: 100%; display: flex; justify-content: center; pointer-events: none;
+            min-height: 100px;
+        }
+
+        .info-card {
+            pointer-events: auto;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 30px 50px;
+            border-radius: 2px;
+            text-align: center;
+            
+            opacity: 0; transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .info-card.visible { opacity: 1; transform: translateY(0); }
+
+        .card-title {
+            font-size: 42px; font-weight: 200; letter-spacing: 6px;
+            color: white; margin: 0 0 5px 0;
+            text-shadow: 0 0 30px var(--accent);
+        }
+        
+        .card-subtitle {
+            font-size: 12px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase;
+            display: block; margin-bottom: 25px;
+        }
+
+        .btn-link {
+            display: inline-block;
+            text-decoration: none;
+            color: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 28px;
+            font-size: 10px; letter-spacing: 3px; text-transform: uppercase; font-weight: bold;
+            transition: all 0.3s;
+            margin: 0 5px;
+        }
+        
+        .btn-link:hover {
+            background: white; color: black; box-shadow: 0 0 25px rgba(255,255,255,0.4);
+        }
+
+        /* --- PHOTO MODAL --- */
+        #photo-modal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            z-index: 50; background: black;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.8s;
+        }
+        
+        #photo-modal img { 
+            max-width: 85vw; max-height: 70vh; 
+            box-shadow: 0 0 100px rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        #photo-details {
+            margin-top: 30px; text-align: center;
+            transform: translateY(20px); transition: transform 0.8s;
+        }
+        
+        #photo-title { font-size: 24px; letter-spacing: 4px; margin-bottom: 20px; font-weight: 300; }
+
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        <header>
+            <div>
+                <h1>Stellar</h1>
+                <div class="subtitle">Deep Space Observatory</div>
+            </div>
+            
+            <div class="controls">
+                <button class="mode-btn active" onclick="setMode('draw')">Draw</button>
+                <button class="mode-btn" onclick="setMode('color')">Spectrum</button>
+                <div style="display:flex;align-items:center;padding:0 8px;color:var(--text-muted);font-size:11px">Threshold:</div>
+                <input id="threshold-slider" type="range" min="0.05" max="0.8" step="0.01" value="0.35" style="width:120px" onchange="updateThreshold(this.value)" />
+                <div id="threshold-val" style="min-width:36px;text-align:center;color:var(--text-muted);font-size:11px">0.35</div>
+                <button class="mode-btn" id="dev-export-btn" onclick="toggleExportMode()">Dev: Export</button>
+                <button class="mode-btn" id="export-download" onclick="exportConstellation()" style="display:none">Download JSON</button>
+            </div>
+        </header>
+
+        <div id="status-area">
+            <div id="status-msg">Draw to Scan</div>
+        </div>
+
+        <div id="result-container">
+            <div id="match-card" class="info-card">
+                <h2 class="card-title" id="card-h2">ORION</h2>
+                <span class="card-subtitle" id="card-sub">The Hunter</span>
+                <a href="#" target="_blank" class="btn-link" id="btn-main">Explore Data</a>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <div id="spectrum-overlay"></div>
+    
+    <div id="photo-modal">
+        <img id="reveal-img" src="">
+        <div id="photo-details">
+            <div id="photo-title">Title</div>
+            <button class="btn-link" onclick="closePhoto()">Close View</button>
+            <a id="photo-source-link" href="#" target="_blank" class="btn-link">Original Source ↗</a>
+        </div>
+    </div>
+
+<script>
+    // ==========================================
+    // 1. DATA REPOSITORY (Local JSONs)
+    // - Loads /assets/data/constellations.json and /assets/data/spectrum.json
+    // - Constellations should contain gestures/strokes in normalized [0..1] coords
+    // - Spectrum entries may contain `file` (local filename under /assets/images/) or `url` (remote fallback)
+    // ==========================================
+
+    // Fallback (original embedded) datasets used if local JSONs fail or are empty
+    const defaultConstellations = [
+        {
+            name: "Centaurus",
+            latin: "The Centaur",
+            slug: "centaurus",
+            strokes: [
+                [[0.7,0.2],[0.6,0.4],[0.5,0.6]],
+                [[0.5,0.6],[0.5,0.75],[0.4,0.9]],
+                [[0.5,0.75],[0.7,0.8],[0.8,0.95]],
+                [[0.5,0.6],[0.4,0.3],[0.35,0.2]],
+                [[0.2,0.45],[0.8,0.35]]
+            ],
+            color: "#e0f2fe"
+        },
+        { name: "Orion", latin: "The Hunter", slug: "orion", strokes: [[[0.2,0.1],[0.3,0.4],[0.5,0.4],[0.7,0.4],[0.8,0.1],[0.5,0.4],[0.5,0.8]]], color: "#38bdf8" },
+        { name: "Ursa Major", latin: "The Great Bear", slug: "ursa-major", strokes: [[[0.1,0.3],[0.3,0.4],[0.5,0.5],[0.5,0.8],[0.8,0.8],[0.8,0.5],[0.5,0.5]]], color: "#f0abfc" },
+        { name: "Scorpius", latin: "The Scorpion", slug: "scorpius", strokes: [[[0.2,0.1],[0.25,0.3],[0.3,0.5],[0.5,0.8],[0.8,0.9],[0.9,0.7]]], color: "#fda4af" },
+        { name: "Cassiopeia", latin: "The Queen", slug: "cassiopeia", strokes: [[[0.1,0.1],[0.3,0.8],[0.5,0.4],[0.7,0.8],[0.9,0.1]]], color: "#fde047" },
+        { name: "Crux", latin: "Southern Cross", slug: "crux", strokes: [[[0.5,0.1],[0.5,0.9],[0.2,0.5],[0.8,0.4]]], color: "#ffffff" }
+    ];
+
+    const defaultSpectrum = [
+        { hue:10, range:15, name:"Carina Nebula", url:"https://live.staticflickr.com/65535/52259221868_cb4132049e_k.jpg", source:"https://www.flickr.com/photos/nasawebbtelescope/52259221868/" },
+        { hue:35, range:15, name:"Cosmic Reef", url:"https://live.staticflickr.com/65535/49813474726_f2a249c5bb_k.jpg", source:"https://www.flickr.com/photos/nasahubble/49813474726/" },
+        { hue:130, range:30, name:"Bubble Nebula", url:"https://live.staticflickr.com/1454/26537703882_a248f323a6_k.jpg", source:"https://www.flickr.com/photos/nasahubble/26537703882/" },
+        { hue:200, range:25, name:"Southern Ring Nebula", url:"https://live.staticflickr.com/65535/52211466039_622e7d6928_k.jpg", source:"https://www.flickr.com/photos/nasawebbtelescope/52211466039/" },
+        { hue:240, range:20, name:"Lagoon Nebula", url:"https://live.staticflickr.com/902/40228800170_0720516f44_k.jpg", source:"https://www.flickr.com/photos/nasahubble/40228800170/" },
+        { hue:280, range:20, name:"Tarantula Nebula", url:"https://live.staticflickr.com/65535/52336343542_d4b9b942f9_k.jpg", source:"https://www.flickr.com/photos/nasawebbtelescope/52336343542/" }
+    ];
+
+    let constellations = [];
+    let spectrumData = [];
+    let repoReady = false;
+    // Adjustable threshold (default more permissive than 0.20)
+    let MATCH_THRESHOLD = 0.35;
+
+    async function loadRepository() {
+        try {
+            const [cResp, sResp] = await Promise.all([
+                fetch('/assets/data/constellations.json'),
+                fetch('/assets/data/spectrum.json')
+            ]);
+
+            if(cResp.ok) constellations = await cResp.json();
+            else console.warn('Failed to load constellations.json', cResp.status);
+
+            if(sResp.ok) spectrumData = await sResp.json();
+            else console.warn('Failed to load spectrum.json', sResp.status);
+
+            // Normalize/prepare data: ensure strokes use {x,y} objects
+            constellations = constellations.map(c => {
+                // Accept either c.strokes (array of strokes) or c.points (single stroke)
+                const strokes = c.strokes || (c.points ? [c.points] : []);
+                const norm = strokes.map(st => st.map(p => {
+                    // p may be [x,y] or {x,y}
+                    if(Array.isArray(p)) return {x: p[0], y: p[1]};
+                    return {x: p.x, y: p.y};
+                }));
+                return Object.assign({}, c, {strokes: norm});
+            });
+
+            // Prepare spectrum: prefer local files
+            spectrumData = spectrumData.map(s => {
+                // if `file` present, create local path
+                if(s.file) s.localUrl = `/assets/images/${s.file}`;
+                else s.localUrl = s.url || null;
+                return s;
+            });
+        } catch (err) {
+            console.error('Repository load error', err);
+        }
+        // If repo did not populate, use defaults as fallback
+        if(!constellations || constellations.length === 0) {
+            console.warn('Using default constellations fallback');
+            constellations = defaultConstellations.map(c=>({
+                name: c.name, latin: c.latin, slug: c.slug, color: c.color, strokes: c.strokes.map(st => st.map(p=>({x:p[0], y:p[1]})))
+            }));
+        }
+        if(!spectrumData || spectrumData.length === 0) {
+            console.warn('Using default spectrum fallback');
+            spectrumData = defaultSpectrum.map(s => ({...s, localUrl: s.url}));
+        }
+        repoReady = true;
+    }
+
+    // ==========================================
+    // 2. APP STATE
+    // ==========================================
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const statusMsg = document.getElementById('status-msg');
+    const matchCard = document.getElementById('match-card');
+    let width, height;
+    let mode = 'draw';
+    
+    // Resize Handle
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        if(mode === 'draw') drawStarField();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    // Load local repository (constellations + spectrum)
+    loadRepository();
+
+    // Developer / tuning
+    let exportMode = false;
+
+    function updateThreshold(v) {
+        MATCH_THRESHOLD = parseFloat(v);
+        document.getElementById('threshold-val').innerText = MATCH_THRESHOLD.toFixed(2);
+    }
+
+    function toggleExportMode() {
+        exportMode = !exportMode;
+        const btn = document.getElementById('dev-export-btn');
+        btn.classList.toggle('active', exportMode);
+        document.getElementById('export-download').style.display = exportMode ? 'inline-block' : 'none';
+        statusMsg.innerText = exportMode ? 'EXPORT MODE' : 'DRAW TO SCAN';
+    }
+
+    function exportConstellation() {
+        if(strokes.length === 0) {
+            statusMsg.innerText = 'DRAW SOME STROKES FIRST';
+            return;
+        }
+        // Convert strokes to normalized 0..1 coords (relative to canvas)
+        const norm = strokes.map(st => st.map(p => [p.x / width, p.y / height]));
+        const name = prompt('Constellation name (short):', 'new-constellation') || 'new-constellation';
+        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const payload = { name, latin: '', slug, color: '#ffffff', strokes: norm };
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${slug}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        statusMsg.innerText = 'EXPORTED';
+    }
+
+    // Mode Switcher
+    function setMode(newMode) {
+        mode = newMode;
+        
+        // Update Buttons
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.innerText.toLowerCase().includes(mode));
+        });
+
+        const spectrum = document.getElementById('spectrum-overlay');
+        
+        if (mode === 'draw') {
+            spectrum.style.opacity = 0;
+            canvas.style.pointerEvents = 'auto';
+            statusMsg.innerText = "DRAW TO SCAN";
+            matchCard.classList.remove('visible');
+            drawStarField();
+        } else {
+            spectrum.style.opacity = 1;
+            canvas.style.pointerEvents = 'none'; // Pass clicks to body for spectrum
+            statusMsg.innerText = "EXPLORE SPECTRUM";
+            matchCard.classList.remove('visible');
+        }
+    }
+
+    // ==========================================
+    // 3. DRAWING ENGINE (Multi-Stroke)
+    // ==========================================
+    let isDrawing = false;
+    let strokes = []; 
+    let currentStroke = [];
+    let drawTimer = null;
+
+    canvas.addEventListener('mousedown', startStroke);
+    canvas.addEventListener('mousemove', moveStroke);
+    canvas.addEventListener('mouseup', endStroke);
+    canvas.addEventListener('touchstart', (e) => startStroke(e.touches[0]));
+    canvas.addEventListener('touchmove', (e) => moveStroke(e.touches[0]));
+    canvas.addEventListener('touchend', endStroke);
+
+    function startStroke(e) {
+        if(mode !== 'draw') return;
+        if(drawTimer) clearTimeout(drawTimer);
+        
+        if(strokes.length === 0 && matchCard.classList.contains('visible')) {
+            matchCard.classList.remove('visible'); // Reset on new draw
+            drawStarField();
+        }
+
+        isDrawing = true;
+        currentStroke = [{x: e.clientX, y: e.clientY}];
+        statusMsg.style.opacity = 0.2;
+        
+        ctx.beginPath();
+        ctx.moveTo(e.clientX, e.clientY);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'white';
+    }
+
+    function moveStroke(e) {
+        if(!isDrawing) return;
+        const p = {x: e.clientX, y: e.clientY};
+        currentStroke.push(p);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+    }
+
+    function endStroke() {
+        if(!isDrawing) return;
+        isDrawing = false;
+        ctx.shadowBlur = 0;
+        
+        if(currentStroke.length > 5) strokes.push(currentStroke);
+        
+        // Wait 1.2s for user to draw another line (e.g. for legs/arms)
+        drawTimer = setTimeout(analyzeDrawing, 1200);
+    }
+
+    // ==========================================
+    // 4. PRECISE MATCHING (Geometric Resampling Engine — $1-style)
+    // - Step A: Resample user path to N equidistant points
+    // - Step B: Normalize to 1x1 bounding box (uniform scale)
+    // - Step C: Compare mean Euclidean distance to DB vectors
+    // - Step D: Trigger only if mean distance < 0.20
+    // ==========================================
+    function analyzeDrawing() {
+        if(strokes.length === 0) return;
+        if(!repoReady) {
+            statusMsg.innerText = 'LOADING DATA...';
+            // retry shortly after repository loads
+            setTimeout(analyzeDrawing, 300);
+            return;
+        }
+        if(exportMode) {
+            statusMsg.innerText = 'EXPORT: click Download JSON';
+            return;
+        }
+        statusMsg.style.opacity = 1;
+        statusMsg.innerText = "ANALYZING...";
+
+        // Concatenate all strokes into a single path
+        let flatPoints = strokes.flat();
+
+        // Resample user drawing in pixel space first to 64 points
+        const RESAMPLE_N = 64;
+        const userResampledPixels = resamplePath(flatPoints, RESAMPLE_N);
+
+        // Normalize to 1x1 square
+        const userNormalized = normalizeToSquare(userResampledPixels);
+
+        // Compare against repository (prepare DB vectors lazily)
+        let bestMatch = null;
+        let bestScore = Infinity;
+
+        constellations.forEach(c => {
+            // Combine all strokes for this constellation into a single path
+            const combined = (c.strokes || []).flat();
+            if(combined.length < 2) return;
+
+            // DB strokes are expected to be normalized already; but resample them to N points
+            const dbResampled = resamplePath(combined.map(p=>({x: p.x * width, y: p.y * height})), RESAMPLE_N);
+            const dbNormalized = normalizeToSquare(dbResampled);
+
+            const score = meanEuclideanDistance(userNormalized, dbNormalized);
+
+            if(score < bestScore) {
+                bestScore = score;
+                bestMatch = c;
+            }
+        });
+
+        // Threshold = 0.20 as requested (mean Euclidean on normalized 0..1 grid)
+        // Use adjustable threshold
+        if(bestScore < MATCH_THRESHOLD && bestMatch) {
+            showMatch(bestMatch);
+            statusMsg.innerText = "MATCH CONFIRMED";
+        } else {
+            statusMsg.innerText = "NO SIGNAL FOUND";
+            setTimeout(() => {
+                if(!isDrawing) {
+                    strokes = [];
+                    drawStarField();
+                    statusMsg.innerText = "DRAW TO SCAN";
+                }
+            }, 1500);
+        }
+        strokes = []; // Clear memory
+    }
+
+    function showMatch(data) {
+        // Clear canvas
+        drawStarField();
+        
+        // Draw Ideal Shape (support multi-stroke `strokes` or legacy `points`)
+        const strokes = data.strokes || (data.points ? [data.points] : []);
+        const scale = Math.min(width, height) * 0.4;
+        const cx = width/2, cy = height/2;
+
+        ctx.strokeStyle = data.color || '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = data.color || '#ffffff';
+        ctx.shadowBlur = 25;
+
+        strokes.forEach(st => {
+            ctx.beginPath();
+            st.forEach((p, i) => {
+                const px = (p.x !== undefined ? p.x : p[0]);
+                const py = (p.y !== undefined ? p.y : p[1]);
+                const x = (px * scale) + (cx - scale/2);
+                const y = (py * scale) + (cy - scale/2);
+                if(i===0) ctx.moveTo(x,y);
+                else ctx.lineTo(x,y);
+
+                // Draw Star Joint
+                ctx.fillStyle = "white";
+                ctx.fillRect(x-2, y-2, 4, 4);
+            });
+            ctx.stroke();
+        });
+
+        // UI Update
+        document.getElementById('card-h2').innerText = data.name;
+        document.getElementById('card-h2').style.textShadow = `0 0 30px ${data.color}`;
+        document.getElementById('card-sub').innerText = data.latin;
+        document.getElementById('card-sub').style.color = data.color;
+        
+    const btn = document.getElementById('btn-main');
+    // Link should point to the /r route per spec
+    btn.href = `https://noirlab.edu/public/education/constellations/${data.slug}/r`;
+        btn.innerText = "EXPLORE DATA ↗";
+        
+        matchCard.classList.add('visible');
+    }
+
+    // Geometry Helpers (Precise)
+    function pathLength(points) {
+        let d = 0;
+        for(let i=1;i<points.length;i++) {
+            const dx = points[i].x - points[i-1].x;
+            const dy = points[i].y - points[i-1].y;
+            d += Math.hypot(dx, dy);
+        }
+        return d;
+    }
+
+    // Resample path to N equidistant points (pixels)
+    function resamplePath(points, n) {
+        if(points.length === 0) return [];
+        const I = pathLength(points) / (n - 1);
+        const newPoints = [ {x: points[0].x, y: points[0].y} ];
+        let D = 0.0;
+
+        for (let i = 1; i < points.length; i++) {
+            const pt1 = points[i - 1];
+            const pt2 = points[i];
+            let d = Math.hypot(pt2.x - pt1.x, pt2.y - pt1.y);
+            if ((D + d) >= I) {
+                const t = (I - D) / d;
+                const nx = pt1.x + t * (pt2.x - pt1.x);
+                const ny = pt1.y + t * (pt2.y - pt1.y);
+                const np = {x: nx, y: ny};
+                newPoints.push(np);
+                // insert np as the new starting point
+                points.splice(i, 0, np);
+                D = 0.0;
+            } else {
+                D += d;
+            }
+        }
+
+        // due to rounding, we may have fewer points; pad with last
+        while(newPoints.length < n) newPoints.push({x: points[points.length-1].x, y: points[points.length-1].y});
+        // trim if too many
+        if(newPoints.length > n) newPoints.length = n;
+        return newPoints;
+    }
+
+    // Normalize points to 1x1 square with uniform scale (centered at 0..1)
+    function normalizeToSquare(points) {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        points.forEach(p => {
+            minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+            minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+        });
+        const w = maxX - minX || 1;
+        const h = maxY - minY || 1;
+        const scale = Math.max(w, h); // uniform scaling to preserve shape
+        return points.map(p => ({ x: (p.x - minX) / scale, y: (p.y - minY) / scale }));
+    }
+
+    function meanEuclideanDistance(a, b) {
+        // both arrays must be same length
+        const n = Math.min(a.length, b.length);
+        if(n === 0) return Infinity;
+        let sum = 0;
+        for(let i=0;i<n;i++) {
+            const dx = a[i].x - b[i].x;
+            const dy = a[i].y - b[i].y;
+            sum += Math.hypot(dx, dy);
+        }
+        return sum / n;
+    }
+
+
+    // ==========================================
+    // 5. SPECTRUM MODE (Optimized)
+    // ==========================================
+    
+    // Mouse Move: Gradient Preview
+    document.addEventListener('mousemove', (e) => {
+        if(mode !== 'color') return;
+        
+        const xPct = e.clientX / width;
+        const hue = Math.floor(xPct * 360);
+        
+        // Show gradient flashlight
+        const spectrum = document.getElementById('spectrum-overlay');
+        spectrum.style.background = `radial-gradient(circle at ${e.clientX}px ${e.clientY}px, hsla(${hue}, 80%, 60%, 0.3) 0%, black 50%)`;
+        
+        statusMsg.style.color = `hsl(${hue}, 80%, 70%)`;
+        statusMsg.innerText = `FREQ: ${hue}Hz`;
+    });
+
+    // Double Click: Lock & Load
+    document.addEventListener('dblclick', (e) => {
+        if(mode !== 'color') return;
+        
+        const xPct = e.clientX / width;
+        const targetHue = Math.floor(xPct * 360);
+        // Convert clicked hue -> Lab color (assume full sat, mid lightness)
+        const clickedRgb = hslToRgb(targetHue/360, 1, 0.5);
+        const clickedLab = rgbToLab(clickedRgb.r, clickedRgb.g, clickedRgb.b);
+
+        // Find best match via Lab distance (deltaE CIE76)
+        let best = null;
+        let bestScore = Infinity;
+        spectrumData.forEach(item => {
+            // Representative color: priority -> item.hex -> item.hue -> derive from file? -> fallback
+            let repRgb = null;
+            if(item.hex) repRgb = hexToRgb(item.hex);
+            else if(typeof item.hue === 'number') repRgb = hslToRgb(item.hue/360, 1, 0.5);
+            else repRgb = {r:255,g:255,b:255};
+
+            const repLab = rgbToLab(repRgb.r, repRgb.g, repRgb.b);
+            const dE = deltaE76(clickedLab, repLab);
+
+            // Allow small hue-range boost if provided
+            let score = dE;
+            if(item.range && typeof item.hue === 'number') {
+                let hueDist = Math.abs(item.hue - targetHue);
+                if(hueDist > 180) hueDist = 360 - hueDist;
+                // reduce score if within hue range
+                if(hueDist <= item.range) score *= 0.6;
+            }
+
+            if(score < bestScore) {
+                bestScore = score;
+                best = item;
+            }
+        });
+
+        // Threshold: deltaE ~ 45 is a reasonable perceptual threshold; be permissive
+        if(best && bestScore < 45) {
+            openPhoto(best);
+        } else {
+            statusMsg.innerText = "NO SIGNAL DETECTED";
+            statusMsg.style.color = "white";
+        }
+    });
+
+    function openPhoto(data) {
+        const modal = document.getElementById('photo-modal');
+        const img = document.getElementById('reveal-img');
+        const title = document.getElementById('photo-title');
+        const sourceLink = document.getElementById('photo-source-link');
+        // Prefer local image if available (resolve CORS), otherwise fallback to remote url
+        img.src = data.localUrl || data.url || '';
+        title.innerText = data.name;
+        sourceLink.href = data.source || data.url || '#';
+        
+        modal.style.opacity = 1;
+        modal.style.pointerEvents = "auto";
+    }
+
+    // Color helpers: HSL<->RGB, HEX->RGB and RGB->Lab (approx)
+    function hslToRgb(h, s, l){
+        // h in [0,1]
+        let r, g, b;
+        if(s==0){ r=g=b=l; }
+        else{
+            const hue2rgb = (p, q, t) => {
+                if(t<0) t+=1; if(t>1) t-=1;
+                if(t<1/6) return p + (q-p)*6*t;
+                if(t<1/2) return q;
+                if(t<2/3) return p + (q-p)*(2/3 - t)*6;
+                return p;
+            }
+            const q = l < 0.5 ? l * (1 + s) : l + s - l*s;
+            const p = 2*l - q;
+            r = hue2rgb(p, q, h + 1/3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1/3);
+        }
+        return { r: Math.round(r*255), g: Math.round(g*255), b: Math.round(b*255) };
+    }
+
+    function hexToRgb(hex) {
+        const h = hex.replace('#','');
+        const bigint = parseInt(h, 16);
+        if(h.length===3){
+            return { r: parseInt(h[0]+h[0],16), g: parseInt(h[1]+h[1],16), b: parseInt(h[2]+h[2],16) };
+        }
+        return { r: (bigint>>16)&255, g: (bigint>>8)&255, b: bigint&255 };
+    }
+
+    function rgbToXyz(r,g,b){
+        // sRGB (0..255) -> XYZ
+        r/=255; g/=255; b/=255;
+        // gamma correction
+        r = r>0.04045 ? Math.pow((r+0.055)/1.055,2.4) : r/12.92;
+        g = g>0.04045 ? Math.pow((g+0.055)/1.055,2.4) : g/12.92;
+        b = b>0.04045 ? Math.pow((b+0.055)/1.055,2.4) : b/12.92;
+        const x = (r*0.4124 + g*0.3576 + b*0.1805) * 100;
+        const y = (r*0.2126 + g*0.7152 + b*0.0722) * 100;
+        const z = (r*0.0193 + g*0.1192 + b*0.9505) * 100;
+        return {x,y,z};
+    }
+
+    function xyzToLab(x,y,z){
+        // D65 reference white
+        const refX = 95.047, refY = 100.000, refZ = 108.883;
+        x/=refX; y/=refY; z/=refZ;
+        const f = t => t > 0.008856 ? Math.pow(t, 1/3) : (7.787 * t) + 16/116;
+        const fx = f(x), fy = f(y), fz = f(z);
+        const L = (116 * fy) - 16;
+        const a = 500 * (fx - fy);
+        const b = 200 * (fy - fz);
+        return {L,a,b};
+    }
+
+    function rgbToLab(r,g,b){
+        const xyz = rgbToXyz(r,g,b);
+        return xyzToLab(xyz.x, xyz.y, xyz.z);
+    }
+
+    function deltaE76(labA, labB){
+        const dL = labA.L - labB.L;
+        const da = labA.a - labB.a;
+        const db = labA.b - labB.b;
+        return Math.sqrt(dL*dL + da*da + db*db);
+    }
+
+    function closePhoto() {
+        const modal = document.getElementById('photo-modal');
+        modal.style.opacity = 0;
+        modal.style.pointerEvents = "none";
+    }
+
+
+    // ==========================================
+    // 6. BACKGROUND VISUALS
+    // ==========================================
+    function drawStarField() {
+        ctx.clearRect(0,0,width,height);
+        ctx.fillStyle = "white";
+        
+        // Create static stars
+        for(let i=0; i<300; i++) {
+            const x = Math.random()*width;
+            const y = Math.random()*height;
+            const r = Math.random() * 1.5;
+            const alpha = Math.random();
+            
+            ctx.globalAlpha = alpha * 0.8 + 0.1;
+            ctx.beginPath();
+            ctx.arc(x,y,r,0,Math.PI*2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+</script>
+</body>
+</html>
