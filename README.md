@@ -1,39 +1,54 @@
-# Astro-canvas
+# Stellar Lines: A Lucid Observatory 🌌
 
-A small static site consisting of a few HTML pages and an assets folder containing data and images used by the pages.
+> "Start with a line, let the universe complete the picture."
 
-Quick start
+**Stellar Lines** is an interactive web experiment that explores the relationship between human gesture and celestial geometry. Inspired by the [Land Lines](https://lines.chromeexperiments.com/) Chrome Experiment, this project transforms abstract data into a playful, tactile discovery of the cosmos.
 
-- Open the site locally: double-click `index.html` or serve the folder and open http://localhost:8000
-  - To serve quickly from macOS (zsh):
+[**✨ View Live Project**](https://fredapeng.github.io/Astro-canvas/)
 
-    python3 -m http.server 8000
+## 🔭 Project Overview
 
-- Files of interest:
-  - `index.html`, `astro.html`, `astro_lucid.html`, `cosmic_draw.html` — main pages
-  - `assets/` — images and data used by the site (JSON manifests and images)
+Traditionally, learning astronomy feels academic and rigid. Stellar Lines removes the clutter of textbooks to focus on pure interaction.
+- **Visual Style:** "Lucid Space" — A glassmorphic, ethereal UI that feels transparent and focuses on light and geometry.
+- **Goal:** To bridge the gap between idle doodles and the ancient constellations defined by the IAU.
 
-About "transform to Pages" showing queued/overtime
+## 🚀 Features
 
-If your Pages deployment (or other hosting transform) shows messages like "Queued", "Queued overtime", or long delays, common causes and checks:
+### 1. Draw Mode (Gesture Recognition)
+Draw any shape—a line, a curve, a hook—and the system uses a **geometric resampling engine** (based on the $1 Unistroke Recognizer algorithm) to analyze your input. It instantly "snaps" your drawing to the nearest matching constellation fragment from the database.
+- **Multi-Stroke Support:** Lift your mouse to draw complex shapes like *Centaurus*.
+- **Smart Data:** Matches link directly to [NOIRLab](https://noirlab.edu) for educational context.
 
-- GitHub Pages build queue or GitHub Actions backlog: check the repository's Actions and Pages build logs in the GitHub UI for build progress and errors.
-- Large files in the repo (big images, videos): large assets can slow or block deployments. Consider moving large media to a CDN, Git LFS, or an external hosting service.
-- Missing or misconfigured deployment settings: GitHub Pages expects either the repository root or `docs/` folder (or `gh-pages` branch). Confirm the Pages source in repository settings.
-- Using an external CI/deployer (Netlify/Vercel): check that provider's build/deploy logs — e.g., Netlify UI or Vercel dashboard — for queue/backlog messages.
-- Rate limits or outages: intermittently GitHub or third-party hosts can queue builds during high load.
+### 2. Spectrum Mode (Color Discovery)
+Explore the universe through the physics of light. Move your cursor to traverse the visible light spectrum (Redshift to Blueshift).
+- **Interactive Gradient:** The background shifts from deep infrared-reds to ultraviolet-blues.
+- **Telescope Lock:** Double-click a frequency to reveal deep-space photography (Hubble/Webb) corresponding to that chemical color palette.
 
-Recommended quick troubleshooting steps
+## 🛠️ Tech Stack
 
-1. In GitHub: open the repository, click "Actions" and "Pages" to view any running or failed builds and their logs.
-2. Check for very large files:
-   - Run `git ls-files --stage` and inspect file sizes locally or use `du -sh assets/*` to see large directories.
-3. If builds are queued repeatedly: try a small test change (e.g., edit `README.md`) and push to see whether the Pages build starts and completes.
-4. Consider hosting static pages on Netlify or Vercel (they show clearer deploy logs), or push to a `gh-pages` branch and use a simple deploy action.
+* **Core:** HTML5 Canvas, Vanilla JavaScript (ES6+)
+* **Styling:** CSS3 (Backdrop Filter, Glassmorphism)
+* **Algorithms:** $1 Unistroke Recognizer (Geometric Matching), Euclidean Distance (Color Matching)
+* **Data:** Custom JSON databases for IAU Constellations and NASA/Flickr Image Archives.
 
-If you'd like, I can:
-- scan the repository for very large files and list them,
-- add a small GitHub Action to deploy to `gh-pages`, or
-- add a note to the README about how you currently deploy (if you tell me which provider you use).
+## 📦 Installation & Setup
 
-License: MIT (add a license file if you want to use a different license)
+To run this project locally:
+
+1.  **Clone the repository**
+    ```bash
+    git clone [https://github.com/FredaPeng/Astro-canvas.git](https://github.com/FredaPeng/Astro-canvas.git)
+    ```
+2.  **Open the project**
+    Navigate to the folder and open `index.html` in your browser.
+    *Note: For the Fetch API to load JSON data correctly, you may need to run a local server (e.g., Live Server in VS Code).*
+
+## 📚 Credits & Data Sources
+
+* **Inspiration:** [Land Lines](https://lines.chromeexperiments.com/)
+* **Constellation Data:** [IAU](https://www.iau.org/) & [NOIRLab](https://noirlab.edu/)
+* **Imagery:** NASA, Hubble Heritage Project, James Webb Space Telescope (Flickr)
+* **Algorithm:** $1 Unistroke Recognizer (Wobbrock, Wilson, Li)
+
+---
+*Created by **Freda Peng** for **IN250: Cosmic Vision/Fall25**
