@@ -23,7 +23,7 @@ from io import BytesIO
 from PIL import Image
 from colorthief import ColorThief
 
-OUT_DIR = 'assets/images'
+OUT_DIR = 'assets/images/Spectrum Palette'
 OUT_MANIFEST = 'assets/data/spectrum.json'
 
 os.makedirs(OUT_DIR, exist_ok=True)
