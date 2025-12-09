@@ -126,6 +126,97 @@
      * STELLAR ENGINE
      * Implements $1 Unistroke Recognizer Logic for precise gesture matching
      */
+
+    // Inline fallback datasets (adopted from astro_lucid.html)
+    const INLINE_CONSTELLATIONS = [
+        {
+            name: "Centaurus",
+            latin: "The Centaur",
+            slug: "centaurus",
+            points: [
+                [0.7, 0.2], [0.6, 0.4], [0.5, 0.6],
+                [0.5, 0.6], [0.5, 0.75], [0.4, 0.9],
+                [0.5, 0.75], [0.7, 0.8], [0.8, 0.95],
+                [0.5, 0.6], [0.4, 0.3], [0.35, 0.2],
+                [0.2, 0.45], [0.8, 0.35]
+            ],
+            color: "#e0f2fe"
+        },
+        {
+            name: "Orion",
+            latin: "The Hunter",
+            slug: "orion",
+            points: [[0.2, 0.1], [0.3, 0.4], [0.5, 0.4], [0.7, 0.4], [0.8, 0.1], [0.5, 0.4], [0.5, 0.8]],
+            color: "#38bdf8"
+        },
+        {
+            name: "Ursa Major",
+            latin: "The Great Bear",
+            slug: "ursa-major",
+            points: [[0.1, 0.3], [0.3, 0.4], [0.5, 0.5], [0.5, 0.8], [0.8, 0.8], [0.8, 0.5], [0.5, 0.5]],
+            color: "#f0abfc"
+        },
+        {
+            name: "Scorpius",
+            latin: "The Scorpion",
+            slug: "scorpius",
+            points: [[0.2, 0.1], [0.25, 0.3], [0.3, 0.5], [0.5, 0.8], [0.8, 0.9], [0.9, 0.7]],
+            color: "#fda4af"
+        },
+        {
+            name: "Cassiopeia",
+            latin: "The Queen",
+            slug: "cassiopeia",
+            points: [[0.1, 0.1], [0.3, 0.8], [0.5, 0.4], [0.7, 0.8], [0.9, 0.1]],
+            color: "#fde047"
+        },
+        {
+            name: "Crux",
+            latin: "Southern Cross",
+            slug: "crux",
+            points: [[0.5, 0.1], [0.5, 0.9], [0.2, 0.5], [0.8, 0.4]],
+            color: "#ffffff"
+        }
+    ];
+
+    const INLINE_SPECTRUM = [
+        { hue: 5, range: 12, name: "Deep Space 001", url: "https://live.staticflickr.com/65535/54722591364_4de90e41de_b.jpg" },
+        { hue: 15, range: 12, name: "Deep Space 002", url: "https://live.staticflickr.com/65535/54707528101_5816459876_b.jpg" },
+        { hue: 25, range: 12, name: "Deep Space 003", url: "https://live.staticflickr.com/65535/54960149350_8a79461ec1_b.jpg" },
+        { hue: 35, range: 12, name: "Deep Space 004", url: "https://live.staticflickr.com/65535/54936898032_51401746c0_b.jpg" },
+        { hue: 45, range: 12, name: "Deep Space 005", url: "https://live.staticflickr.com/65535/54923541469_27761e77cc_b.jpg" },
+        { hue: 55, range: 12, name: "Deep Space 006", url: "https://live.staticflickr.com/65535/54813269454_0da23c1414_b.jpg" },
+        { hue: 65, range: 12, name: "Deep Space 007", url: "https://live.staticflickr.com/65535/54798175663_7287fb1130_b.jpg" },
+        { hue: 75, range: 12, name: "Deep Space 008", url: "https://live.staticflickr.com/65535/54782043516_2c0b8f4ab5_b.jpg" },
+        { hue: 85, range: 12, name: "Deep Space 009", url: "https://live.staticflickr.com/65535/54766866371_42f6bf793d_b.jpg" },
+        { hue: 95, range: 12, name: "Deep Space 010", url: "https://live.staticflickr.com/65535/54751327482_b8fa6230d1_b.jpg" },
+        { hue: 105, range: 12, name: "Deep Space 011", url: "https://live.staticflickr.com/65535/54752171316_85d0243468_b.jpg" },
+        { hue: 115, range: 12, name: "Deep Space 012", url: "https://live.staticflickr.com/65535/54705871679_3d34fede92_b.jpg" },
+        { hue: 125, range: 12, name: "Deep Space 013", url: "https://live.staticflickr.com/65535/54693242188_1f6c7665e5_b.jpg" },
+        { hue: 135, range: 12, name: "Deep Space 014", url: "https://live.staticflickr.com/65535/54685492269_bf529cb124_b.jpg" },
+        { hue: 145, range: 12, name: "Deep Space 015", url: "https://live.staticflickr.com/65535/54685582590_95a5340988_b.jpg" },
+        { hue: 155, range: 12, name: "Deep Space 016", url: "https://live.staticflickr.com/65535/54685247291_bb5e774389_b.jpg" },
+        { hue: 165, range: 12, name: "Deep Space 017", url: "https://live.staticflickr.com/65535/54678376370_730c694d62_b.jpg" },
+        { hue: 175, range: 12, name: "Deep Space 018", url: "https://live.staticflickr.com/65535/54663320185_d6c797eb46_b.jpg" },
+        { hue: 185, range: 12, name: "Deep Space 019", url: "https://live.staticflickr.com/65535/54648019619_4949100f09_b.jpg" },
+        { hue: 195, range: 12, name: "Deep Space 020", url: "https://live.staticflickr.com/65535/54640628332_b3ce600cd9_b.jpg" },
+        { hue: 205, range: 12, name: "Deep Space 021", url: "https://live.staticflickr.com/65535/54641783315_4f5d135543_b.jpg" },
+        { hue: 215, range: 12, name: "Deep Space 022", url: "https://live.staticflickr.com/65535/54973954619_b501119ebc_b.jpg" },
+        { hue: 225, range: 12, name: "Deep Space 023", url: "https://live.staticflickr.com/65535/54957843876_5038fed5ff_z.jpg" },
+        { hue: 235, range: 12, name: "Deep Space 024", url: "https://live.staticflickr.com/65535/54936300586_d255753f2e_b.jpg" },
+        { hue: 245, range: 12, name: "Deep Space 025", url: "https://live.staticflickr.com/65535/54934228021_6398502656_z.jpg" },
+        { hue: 255, range: 12, name: "Deep Space 026", url: "https://live.staticflickr.com/65535/54923443801_d28eb5bbed_b.jpg" },
+        { hue: 265, range: 12, name: "Deep Space 027", url: "https://live.staticflickr.com/65535/54822781985_8fab3e411d_b.jpg" },
+        { hue: 275, range: 12, name: "Deep Space 028", url: "https://live.staticflickr.com/65535/54820347920_d4c4af338c_b.jpg" },
+        { hue: 285, range: 12, name: "Deep Space 029", url: "https://live.staticflickr.com/65535/54809196576_779435e6ba_b.jpg" },
+        { hue: 295, range: 12, name: "Deep Space 030", url: "https://live.staticflickr.com/65535/54808358047_1b601d83c3_b.jpg" },
+        { hue: 305, range: 12, name: "Deep Space 031", url: "https://live.staticflickr.com/65535/54778067481_021c34c424_b.jpg" },
+        { hue: 315, range: 12, name: "Deep Space 032", url: "https://live.staticflickr.com/65535/54776365099_4335ddc470_b.jpg" },
+        { hue: 325, range: 12, name: "Deep Space 033", url: "https://live.staticflickr.com/65535/54774029725_8acf5f9890_b.jpg" },
+        { hue: 335, range: 12, name: "Deep Space 034", url: "https://live.staticflickr.com/65535/54773689721_9bb8867f44_b.jpg" },
+        { hue: 345, range: 12, name: "Deep Space 035", url: "https://live.staticflickr.com/65535/54764951141_94d1ed4eb0_b.jpg" },
+        { hue: 355, range: 12, name: "Deep Space 036", url: "https://live.staticflickr.com/65535/54752579005_6cedfde623_b.jpg" }
+    ];
     const app = {
         mode: 'draw',
         db: { constellations: [], spectrum: [] },
@@ -139,23 +230,60 @@
             this.resize();
             window.addEventListener('resize', () => this.resize());
             
-            // Fetch Databases
+            // Fetch Databases (prefer local JSON, but fall back to inline arrays if unavailable)
             try {
-                // In production, fetch from './data/constellations.json'
-                // For this demo to work immediately, we load the sample data directly if fetch fails
-                const cRes = await fetch('./data/constellations.json');
+                let cRes = await fetch('./data/constellations_88.json');
+                if(!cRes.ok) cRes = await fetch('./data/constellations.json');
                 const sRes = await fetch('./data/spectrum.json');
-                
-                if(cRes.ok && sRes.ok) {
-                    this.db.constellations = await cRes.json();
-                    this.db.spectrum = await sRes.json();
+
+                if(cRes.ok) {
+                    try { this.db.constellations = await cRes.json(); } catch(e){ this.db.constellations = INLINE_CONSTELLATIONS; }
                 } else {
-                    throw new Error("Local files not found, please ensure data folder exists.");
+                    this.db.constellations = INLINE_CONSTELLATIONS;
                 }
+
+                if(sRes.ok) {
+                    try { this.db.spectrum = await sRes.json(); } catch(e){ this.db.spectrum = INLINE_SPECTRUM; }
+                } else {
+                    this.db.spectrum = INLINE_SPECTRUM;
+                }
+
+                // Precompute a normalized/resampled shape for each DB entry so matching is fast and robust.
+                this.db.constellations.forEach(c => {
+                    // Support multiple input formats:
+                    // - modern: c.strokes -> [ [ [x,y], ... ], ... ]
+                    // - legacy: c.points -> [ [x,y], ... ]
+                    let rawPoints = [];
+                    if (Array.isArray(c.strokes) && c.strokes.length) {
+                        rawPoints = c.strokes.flat();
+                    } else if (Array.isArray(c.points) && c.points.length) {
+                        rawPoints = c.points;
+                    }
+
+                    const mapped = rawPoints.map(p => ({ x: p[0], y: p[1] }));
+                    c._resampled = mapped.length ? this.resample(mapped, 40) : [];
+                });
+
+                const withStrokes = this.db.constellations.filter(c => Array.isArray(c._resampled) && c._resampled.length).length;
+                console.log(`Loaded ${this.db.constellations.length} constellations (${withStrokes} with stroke data)`);
+
                 document.getElementById('status').innerText = "Database Ready. Draw to Scan.";
             } catch(e) {
-                console.warn("Using fallback mode. Ensure JSON files are in /data folder.");
-                document.getElementById('status').innerText = "Data Load Error (See Console)";
+                console.warn("Using inline fallback datasets due to fetch error:", e);
+                // Use inline datasets as a robust fallback
+                this.db.constellations = INLINE_CONSTELLATIONS;
+                this.db.spectrum = INLINE_SPECTRUM;
+
+                // Precompute resampled shapes for inline constellations
+                this.db.constellations.forEach(c => {
+                    let rawPoints = [];
+                    if (Array.isArray(c.strokes) && c.strokes.length) rawPoints = c.strokes.flat();
+                    else if (Array.isArray(c.points) && c.points.length) rawPoints = c.points;
+                    const mapped = rawPoints.map(p => ({ x: p[0], y: p[1] }));
+                    c._resampled = mapped.length ? this.resample(mapped, 40) : [];
+                });
+
+                document.getElementById('status').innerText = "Database Ready (Offline). Draw to Scan.";
             }
 
             this.setupEvents();
@@ -244,23 +372,21 @@
             if(this.strokes.length < 10) return;
             document.getElementById('status').innerText = "Processing Geometry...";
 
-            // 1. Resample to 64 points (Standardizes speed/size)
-            const resampled = this.resample(this.strokes, 64);
-            // 2. Scale to 1x1 Box (Standardizes size)
-            const scaled = this.scaleToSquare(resampled);
-            // 3. Translate to Origin (Standardizes position)
-            const normalized = this.translateToOrigin(scaled);
+            // Normalize user input to 0..1 bounding box (same approach as astro_lucid)
+            const flat = this.strokes.slice();
+            // map to {x,y}
+            const flatPts = flat.map(p => ({ x: p.x, y: p.y }));
+            const normalizedBox = this.normalize(flatPts);
+            // Resample to 40 points for speed/responsiveness
+            const normalized = this.resample(normalizedBox, 40);
 
             let bestScore = Infinity;
             let match = null;
 
-            // Compare against DB
+            // Compare against DB (use precomputed resampled shapes)
             this.db.constellations.forEach(c => {
-                // Prepare DB shape (should ideally be done once on load)
-                const dbPoints = c.strokes.map(p => ({x: p[0], y: p[1]}));
-                const dbResampled = this.resample(dbPoints, 64);
-                // Note: DB is already 0-1, but we ensure it matches the 64 point count
-                
+                const dbResampled = c._resampled || [];
+                if(!dbResampled.length) return;
                 const d = this.pathDistance(normalized, dbResampled);
                 if(d < bestScore) {
                     bestScore = d;
@@ -268,8 +394,8 @@
                 }
             });
 
-            // Threshold (0.35 allows for "sketchy" lines)
-            if(bestScore < 0.35) {
+            // Threshold: relaxed to allow rough/multi-stroke sketches
+            if(bestScore < 0.5) {
                 this.revealMatch(match);
             } else {
                 document.getElementById('status').innerText = "No Match Found. Try Again.";
@@ -333,6 +459,18 @@
             pts.forEach(p => { x += p.x; y += p.y; });
             return { x: x / pts.length, y: y / pts.length };
         },
+        // Normalize points to 0..1 bounding box (keeps relative layout)
+        normalize: function(points) {
+            if(!points || points.length === 0) return [];
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            points.forEach(p => {
+                minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+            });
+            const w = (maxX - minX) || 1;
+            const h = (maxY - minY) || 1;
+            return points.map(p => ({ x: (p.x - minX) / w, y: (p.y - minY) / h }));
+        },
 
         // --- 4. VISUALIZATION ---
         revealMatch: function(data) {
@@ -349,14 +487,25 @@
             this.ctx.shadowBlur = 30;
             
             this.ctx.beginPath();
-            data.strokes.forEach((p, i) => {
-                // Map 0-1 coord back to screen center
+            // Accept multiple shapes: strokes array (flattened) or legacy points
+            let drawPoints = [];
+            if (Array.isArray(data.strokes) && data.strokes.length) {
+                // data.strokes may be [[x,y],...] or [[ [x,y], ... ], ...]
+                if (Array.isArray(data.strokes[0]) && Array.isArray(data.strokes[0][0])) {
+                    drawPoints = data.strokes.flat();
+                } else {
+                    drawPoints = data.strokes;
+                }
+            } else if (Array.isArray(data.points) && data.points.length) {
+                drawPoints = data.points;
+            }
+
+            drawPoints.forEach((p, i) => {
                 const x = (p[0] * scale) + (cx - scale/2);
                 const y = (p[1] * scale) + (cy - scale/2);
                 if(i===0) this.ctx.moveTo(x,y);
                 else this.ctx.lineTo(x,y);
-                
-                // Draw Joint
+
                 this.ctx.fillStyle = "white";
                 this.ctx.fillRect(x-3, y-3, 6, 6);
             });
